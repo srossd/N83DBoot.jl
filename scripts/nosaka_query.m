@@ -29,12 +29,12 @@ Off[N::meprec];
 Off[Series::ztest1];
 
 (* Compute the three independent OPE coefficients *)
-lam2_Bp0020   = N[256/cT[abjmK, abjmM, abjmN], 150];
-lam2_Btwo0200 = N[\[Lambda]B2[abjmK, abjmM, abjmN], 150];
-lam2_Bp0040   = N[\[Lambda]Bp[abjmK, abjmM, abjmN], 150];
-cT_val        = N[cT[abjmK, abjmM, abjmN], 150];
-rhs_val       = N[rhs[abjmK, abjmM, abjmN], 150];
+lam2Bp0020   = N[256/cT[abjmK, abjmM, abjmN], 150];
+lam2Btwo0200 = N[\[Lambda]B2[abjmK, abjmM, abjmN], 150];
+lam2Bp0040   = N[\[Lambda]Bp[abjmK, abjmM, abjmN], 150];
+cTval        = N[cT[abjmK, abjmM, abjmN], 150];
+rhsval       = N[rhs[abjmK, abjmM, abjmN], 150];
 
 Print[StringRiffle[
-    ToString /@ {cT_val, lam2_Bp0020, lam2_Bp0040, lam2_Btwo0200, rhs_val},
+    ToString /@ {cTval, lam2Bp0020, lam2Bp0040, lam2Btwo0200, rhsval},
     " "]]

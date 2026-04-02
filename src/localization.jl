@@ -336,7 +336,7 @@ download_localization_data("https://example.com/Localization.tar.gz")
 function download_localization_data(url_or_filename::String;
                                     data_dir::String=get_localization_dir(),
                                     expected_sha256::Union{String,Nothing}=nothing)
-    _GITHUB_RELEASES_BASE = "https://github.com/sdempsey/3DN8Boot.jl/releases/latest/download/"
+    _GITHUB_RELEASES_BASE = "https://github.com/srossd/N83DBoot.jl/releases/latest/download/"
     url = startswith(url_or_filename, r"https?://") ? url_or_filename :
           _GITHUB_RELEASES_BASE * url_or_filename
 

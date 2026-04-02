@@ -72,7 +72,7 @@ const JOINT_PLOT = JointBoundsPlot("abjm_semishort_joint_bounds";
     op_y   = OP_Y,
     series = [Metadata("num_integral")],
     xlabel = L"\lambda^2_{(A,+)_0}",
-    ylabel = L"\lambda^2_{(A,2)_1}")
+    ylabel = L"\lambda^2_{(A,+)_2}")
 
 # ---------------------------------------------------------------------------
 # Helper: build the operator grid
@@ -248,7 +248,14 @@ function main()
                               :sdpb_work_dir, :sdpb_results_dir, :slurm_output_dir])
 
     # ── 2. Functional cache check ─────────────────────────────────────────────
-    loc         = load_localization_data(ABJM_N, ABJM_K)
+    loc = nothing
+    try
+        loc         = load_localization_data(ABJM_N, ABJM_K)
+    catch Exception
+        download_localization_data("Localization.tar.gz")
+        loc = load_localization_data(ABJM_N, ABJM_K)
+    end
+
     ops         = build_operators()
     cs          = crossing_constraints(Λ=LAMBDA)
     append!(cs, integral_constraints(loc))
@@ -278,6 +285,7 @@ function main()
             end
         elseif choice == "2"
             download_cache("Lambda_$(LAMBDA).tar.gz")
+            download_localization_data("Localization.tar.gz")
         else
             println("Exiting.")
             return nothing
