@@ -244,7 +244,7 @@ function main()
     println("\n=== ABJM Semishort Joint Bounds: Interactive Mode ===\n")
 
     # ── 1. Configuration ──────────────────────────────────────────────────────
-    configure_interactively([:cache_dir, :localization_data_dir, :sdpb_build_dir,
+    configure_interactively([:cache_dir, :data_dir, :localization_data_dir, :sdpb_build_dir,
                               :sdpb_work_dir, :sdpb_results_dir, :slurm_output_dir])
 
     # ── 2. Functional cache check ─────────────────────────────────────────────
