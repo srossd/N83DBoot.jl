@@ -241,7 +241,7 @@ function get_data(plt::Plot;
 
         row = Dict{String, Any}()
         for (k, v) in metadata
-            if k == "objective_properties" && isa(v, Dict)
+            if k == "objective_properties"
                 for (pk, pv) in v
                     row[String(pk)] = pv
                 end
@@ -653,7 +653,8 @@ end
 
 Build one joint-bounds panel with (possibly multiple) series boundary curves.
 """
-function _build_joint_panel(df::DataFrame, plt::JointBoundsPlot; kwargs...)
+function _build_joint_panel(df::DataFrame, plt::JointBoundsPlot;
+                            show_bounding_lines::Bool=false, kwargs...)
     key_x = _operator_coeff_key(plt.op_x)
     key_y = _operator_coeff_key(plt.op_y)
 
@@ -707,6 +708,34 @@ function _build_joint_panel(df::DataFrame, plt::JointBoundsPlot; kwargs...)
         end
 
         color = OKABE_ITO[mod1(i, length(OKABE_ITO))]
+
+        if show_bounding_lines
+            # Draw each supporting half-plane boundary as a faint line, clipped to
+            # the polygon's bounding box (with 10% padding).
+            x_pad = 0.1 * (maximum(xs) - minimum(xs) + eps())
+            y_pad = 0.1 * (maximum(ys) - minimum(ys) + eps())
+            x_min, x_max = minimum(xs) - x_pad, maximum(xs) + x_pad
+            y_min, y_max = minimum(ys) - y_pad, maximum(ys) + y_pad
+
+            for (k, (nx, ny)) in enumerate(normals)
+                b = bvals[k]
+                if abs(ny) >= abs(nx)
+                    # parameterise in x: y = (b - nx*x) / ny
+                    lx = [x_min, x_max]
+                    ly = [(b - nx * x_min) / ny, (b - nx * x_max) / ny]
+                else
+                    # parameterise in y: x = (b - ny*y) / nx
+                    ly = [y_min, y_max]
+                    lx = [(b - ny * y_min) / nx, (b - ny * y_max) / nx]
+                end
+                plot!(p, lx, ly;
+                      label     = false,
+                      color     = color,
+                      linealpha = 0.3,
+                      linewidth = 0.8)
+            end
+        end
+
         plot!(p, xs, ys;
               seriestype = :shape,
               fillalpha  = 0.35,
@@ -732,6 +761,7 @@ function generate_plot(plt::JointBoundsPlot;
                        results_dir::Union{String,Nothing}=nothing,
                        output_path::Union{String,Nothing}=nothing,
                        filters::AbstractVector=Pair{AxisSpec,Any}[],
+                       show_bounding_lines::Bool=false,
                        plot_kwargs...)
     results_dir = isnothing(results_dir) ? get_config().sdpb_results_dir : results_dir
     plot_dir    = joinpath(results_dir, plt.name)
@@ -765,6 +795,7 @@ function generate_plot(plt::JointBoundsPlot;
     if isempty(plt.panels)
         panel_title = isnothing(user_title) ? plt.name : user_title
         p = _build_joint_panel(df, plt;
+                               show_bounding_lines = show_bounding_lines,
                                title = panel_title,
                                size  = isnothing(user_size) ? default_size : user_size,
                                base_kwargs...)
@@ -783,7 +814,7 @@ function generate_plot(plt::JointBoundsPlot;
         panel_plots = map(sorted_panel_keys) do pk
             panel_label = join([series_label(s, k) for (s, k) in zip(plt.panels, pk)], ", ")
             panel_df    = df[panel_row_indices[pk], :]
-            _build_joint_panel(panel_df, plt; title=panel_label, base_kwargs...)
+            _build_joint_panel(panel_df, plt; show_bounding_lines=show_bounding_lines, title=panel_label, base_kwargs...)
         end
 
         nrows, ncols = _resolve_panel_layout(plt.panel_layout, length(panel_plots))
